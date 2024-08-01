@@ -294,35 +294,62 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-
 
 
 
-resource azureaiResourceAOAIEndpoint 'Microsoft.MachineLearningServices/workspaces/endpoints@2023-08-01-preview' = if (endpointOption == 'new') {
+resource azureaiResourceAOAIConnection 'Microsoft.MachineLearningServices/workspaces/connections@2024-04-01' = if (endpointOption == 'new') {
   parent: azureaiResource
   name: 'Azure.OpenAI'
   properties: {
-    name: 'Azure.OpenAI'
-    endpointType: 'Azure.OpenAI'
-    associatedResourceId: null
+    category: 'AzureOpenAI'
+    authType: 'ApiKey'
+    isSharedToAll: true
+    target: azureAIService.properties.endpoints['OpenAI Language Model Instance API']
+    metadata: {
+      ApiVersion: '2023-07-01-preview'
+      ApiType: 'azure'
+      ResourceId: azureAIService.id
+    }
+    credentials: {
+      key: azureAIService.listKeys().key1
+    }
+    
   }
 }
 
-
-resource azureaiResourceContentSafetyEndpoint 'Microsoft.MachineLearningServices/workspaces/endpoints@2023-08-01-preview' = if (endpointOption == 'new') {
+resource azureaiResourceContentSafetyConnection 'Microsoft.MachineLearningServices/workspaces/connections@2024-04-01' = if (endpointOption == 'new') {
   parent: azureaiResource
   name: 'Azure.ContentSafety'
   properties: {
-    name: 'Azure.ContentSafety'
-    endpointType: 'Azure.ContentSafety'
-    associatedResourceId: null
+    category: 'AzureOpenAI'
+    authType: 'ApiKey'
+    isSharedToAll: true
+    target: azureAIService.properties.endpoints['Content Safety']
+    metadata: {
+      ApiVersion: '2023-07-01-preview'
+      ApiType: 'azure'
+      ResourceId: azureAIService.id
+    }
+    credentials: {
+      key: azureAIService.listKeys().key1
+    }
   }
 }
 
-resource azureaiResourceSpeechEndpoint 'Microsoft.MachineLearningServices/workspaces/endpoints@2023-08-01-preview' = if (endpointOption == 'new') {
+resource azureaiResourceSpeechConnection 'Microsoft.MachineLearningServices/workspaces/connections@2024-04-01' = if (endpointOption == 'new') {
   parent: azureaiResource
   name: 'Azure.Speech'
   properties: {
-    name: 'Azure.Speech'
-    endpointType: 'Azure.Speech'
-    associatedResourceId: null
-  }
+    category: 'AzureOpenAI'
+    authType: 'ApiKey'
+    isSharedToAll: true
+    target: azureAIService.properties.endpoints['Speech Services Speech to Text']
+    metadata: {
+      ApiVersion: '2023-07-01-preview'
+      ApiType: 'azure'
+      ResourceId: azureAIService.id
+    }
+    credentials: {
+      key: azureAIService.listKeys().key1
+    }
+  } 
 }
 
 /*
@@ -372,7 +399,7 @@ module azureaipe 'azure-ai-pe-multi.bicep' = if(peEnabled) {
         azureAIResourceId : storageAccount.id
         privateEndpointGroupId: 'blob'
         privateDnsZoneName: 'privatelink.blob.${environment().suffixes.storage}' //'privatelink.blob.core.windows.net'
-        privateDNSZoneRgName: 'aml-rg'
+        privateDNSZoneRgName: '${resourceGroup().name}'
         azureResourceName : storageAccountName
       }
       {
@@ -381,7 +408,7 @@ module azureaipe 'azure-ai-pe-multi.bicep' = if(peEnabled) {
         azureAIResourceId : storageAccount.id
         privateEndpointGroupId: 'file'
         privateDnsZoneName: 'privatelink.file.${environment().suffixes.storage}' //'privatelink.blob.core.windows.net'
-        privateDNSZoneRgName: 'vnet'
+        privateDNSZoneRgName: '${resourceGroup().name}'
         azureResourceName : storageAccountName
       }
       
@@ -391,7 +418,7 @@ module azureaipe 'azure-ai-pe-multi.bicep' = if(peEnabled) {
         azureAIResourceId : keyVault.id
         privateEndpointGroupId: 'vault'
         privateDnsZoneName: 'privatelink.vaultcore.azure.net' //'privatelink.vault.windows.net'
-        privateDNSZoneRgName: 'vnet'
+        privateDNSZoneRgName: '${resourceGroup().name}'
         azureResourceName : keyVaultName
       }
       
@@ -401,7 +428,7 @@ module azureaipe 'azure-ai-pe-multi.bicep' = if(peEnabled) {
         azureAIResourceId : containerRegistry.id
         privateEndpointGroupId: 'registry'
         privateDnsZoneName: 'privatelink.azurecr.io' 
-        privateDNSZoneRgName: 'vnet'
+        privateDNSZoneRgName: '${resourceGroup().name}'
         azureResourceName : containerRegistryName
       }
       
@@ -411,7 +438,7 @@ module azureaipe 'azure-ai-pe-multi.bicep' = if(peEnabled) {
         azureAIResourceId : azureaiResource.id
         privateEndpointGroupId: 'amlworkspace'
         privateDnsZoneName: 'privatelink.api.azureml.ms' 
-        privateDNSZoneRgName: 'openai'
+        privateDNSZoneRgName: '${resourceGroup().name}'
         azureResourceName : azureAIResourceName
       }
 
@@ -422,7 +449,7 @@ module azureaipe 'azure-ai-pe-multi.bicep' = if(peEnabled) {
         azureAIResourceId : aiSearch.id
         privateEndpointGroupId: 'searchService'
         privateDnsZoneName: 'privatelink.search.windows.net' 
-        privateDNSZoneRgName: 'vnet'
+        privateDNSZoneRgName: '${resourceGroup().name}'
         azureResourceName : aiSearchName
       }
       
