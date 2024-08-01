@@ -244,9 +244,9 @@ resource azureaiProjectResource 'Microsoft.MachineLearningServices/workspaces@20
   kind: 'Project'
   dependsOn: [
     azureAIService
-    azureaiResourceAOAIEndpoint
-    azureaiResourceContentSafetyEndpoint
-    azureaiResourceSpeechEndpoint    
+    azureaiResourceAOAIConnection
+    azureaiResourceContentSafetyConnection
+    azureaiResourceSpeechConnection    
   ]
   identity: {
     type: 'SystemAssigned'
@@ -275,7 +275,7 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-
   name: '${azureAIResourceName}-${modelDeploymentName}'
   parent: azureAIService
   dependsOn: [
-    azureaiResourceAOAIEndpoint
+    azureaiResourceAOAIConnection
     //azureaiProjectResource
   ]
   properties: {
